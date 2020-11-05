@@ -53,6 +53,21 @@ def mean_absolute_error(predict_vetor,label_vector):
     n = predict_vetor.shape[0]
     return np.sum(np.absolute(predict_vetor - label_vector),0) / n
 
+	
+def aggregation_area(segment_area,estimate_area):
+    '''
+    combine segment area and estiamte area with uncertainty estiamtion
+    params
+        segment_area: batch_size*num_class
+        estimate_area: batch_size*num_class
+    '''
+    u_segment_area = np.abs(segment_area-estimate_area)/np.abs(segment_area)
+    u_estimate_area = np.abs(segment_area-estimate_area)/np.abs(estimate_area)
+    weight_segment = 1 - u_segment_area / (u_segment_area + u_estimate_area)
+    weight_estimate = 1 - u_estimate_area / (u_segment_area + u_estimate_area)
+    
+    return weight_segment * segment_area + weight_estimate * estimate_area
+
 class MultiLoss(nn.Module):
     def __init__(self):
         super().__init__()
